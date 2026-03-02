@@ -6,6 +6,7 @@ class Field {
     }
 
     updateMetrics() {
+        if (!this.element) return;
         const rect = this.element.getBoundingClientRect();
         this.top = rect.top + window.scrollY;
         this.bottom = rect.bottom + window.scrollY;
@@ -14,11 +15,17 @@ class Field {
 
     isOnScreen(viewport, percentOnScreen) {
         this.updateMetrics();
+        // For 'body' the height is the whole document, so "50% on screen" almost never holds.
+        // Treat body as always visible while the document is loaded.
+        if (this.selector === 'body' && this.element === document.body) {
+            return true;
+        }
         const threshold = this.height * (percentOnScreen / 100);
-        return (
+        const result = (
             this.bottom - threshold > viewport.top &&
             this.top + threshold < viewport.bottom
         );
+        return result;
     }
 }
 
@@ -27,7 +34,7 @@ export default class ScreenTime {
         this.viewport = {
             top: window.scrollY,
             bottom: window.scrollY + window.innerHeight
-        }
+        };
         this.options = {...ScreenTime.defaults, ...options};
         this.field = new Field(this.options.field.selector);
         this.timer = null;
@@ -123,8 +130,10 @@ export default class ScreenTime {
         if (!this.isActive) {
             return;
         }
-        if (this.field.isOnScreen(this.viewport, this.options.percentOnScreen)) {
-            this.log[this.field.selector] = (this.log[this.field.selector] || 0) + 1;
+        const onScreen = this.field.element ? this.field.isOnScreen(this.viewport, this.options.percentOnScreen) : false;
+        if (onScreen) {
+            const prev = this.log[this.field.selector] || 0;
+            this.log[this.field.selector] = prev + 1;
         }
         if (this.options.everySecondCallback) {
             this.options.everySecondCallback(this.log);
@@ -132,7 +141,8 @@ export default class ScreenTime {
     }
 
     report() {
-        const shouldReport = Date.now() - this.lastReport >= 10;
+        const elapsed = Date.now() - this.lastReport;
+        const shouldReport = elapsed >= 10;
         if (!shouldReport) {
             return;
         }

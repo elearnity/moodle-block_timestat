@@ -2,38 +2,52 @@ import ScreenTime from 'block_timestat/screentime';
 import ajax from 'core/ajax';
 
 export const init = (contextid, config) => {
+    const reportInterval = getReportInterval(config);
+    const inactiveInterval = getInactiveInterval(config);
+
     const $timerDisplay = config.showtimer ? document.querySelector('.timer-display') : null;
-    const $timer = config.showtimer ? document.getElementById('timer') : null;
-    const $reportedtime = config.showtimer ? document.getElementById('reportedtime') : null;
-    const $inactivitytime = config.showtimer ? document.getElementById('inactivitytime') : null;
+    const $timer = document.getElementById('timer');
+    const $reportedtime = document.getElementById('reportedtime');
+    const $inactivitytime = document.getElementById('inactivitytime');
+    const initialSeconds = $timer ? parseInt($timer.dataset.initialSeconds || '0', 10) : 0;
+
     const inactiveClass = 'text-black-50';
     const screentime = new ScreenTime({
         field: {name: 'content', selector: 'body'},
-        reportInterval: getReportInterval(config),
-        inactiveInterval: getInactiveInterval(config),
+        reportInterval: reportInterval,
+        inactiveInterval: inactiveInterval,
         onReport: async (log) => {
             if (!log.body) {
                 return;
             }
-            ajax.call([{
-                methodname: 'block_timestat_update_register',
-                args: {
-                    timespent: log.body,
-                    contextid: parseInt(contextid, 10)
-                }
-            }]);
+            const timespent = log.body;
+            const contextIdInt = parseInt(contextid, 10);
+            try {
+                await ajax.call([{
+                    methodname: 'block_timestat_update_register',
+                    args: {
+                        timespent: timespent,
+                        contextid: contextIdInt
+                    }
+                }]);
+            } catch (err) {
+                // Silently fail; service errors are not shown in UI.
+            }
             if (!$reportedtime) {
                 return;
             }
-            $reportedtime.textContent = formatTime(log.body);
+            const totalSeconds = initialSeconds + (log.body || 0);
+            $reportedtime.textContent = formatTime(totalSeconds);
         },
         everySecondCallback: (log) => {
-            if (!$timer) {
-                return;
+            const sessionSeconds = log['body'] || 0;
+            const seconds = initialSeconds + sessionSeconds;
+            if ($timer) {
+                $timer.textContent = formatTime(seconds);
+                if ($inactivitytime) {
+                    $inactivitytime.textContent = formatTime(screentime.inactivityTimer);
+                }
             }
-            const seconds = log['body'] || 0;
-            $timer.textContent = formatTime(seconds);
-            $inactivitytime.textContent = formatTime(screentime.inactivityTimer);
         },
         onInactivity: () => {
             if (!$timerDisplay) {

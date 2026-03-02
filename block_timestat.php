@@ -49,10 +49,9 @@ class block_timestat extends block_base {
      *
      * @return stdClass contents of block
      * @throws dml_exception
-     * @throws moodle_exception
      */
     public function get_content() {
-        global $COURSE, $OUTPUT;
+        global $COURSE, $OUTPUT, $USER;
         if ($this->content !== null) {
             return $this->content;
         }
@@ -66,6 +65,7 @@ class block_timestat extends block_base {
         $data = new stdClass();
         $data->courseid = $COURSE->id;
         $data->shouldseetimer = $userisenrolled && ($canseetimer || ($config->showtimer ?? false));
+        $data->initialseconds = block_timestat_get_user_course_timespent($COURSE->id, $USER->id);
         $data->shouldseereport = has_capability('block/timestat:viewreport', $context);
         $this->content->text = $OUTPUT->render_from_template('block_timestat/main', $data);
         // If the user is not enrolled in the course, we don't want to count the time.

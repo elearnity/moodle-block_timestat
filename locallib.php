@@ -1023,6 +1023,36 @@ function block_timestat_seconds_to_stringtime($seconds) {
 }
 
 /**
+ * Get the total time (in seconds) a user has spent in a course.
+ *
+ * This aggregates all entries in the timestat table linked to logstore_standard_log
+ * records for the specified course and user.
+ *
+ * @param int $courseid
+ * @param int $userid
+ * @return int
+ * @throws dml_exception
+ */
+function block_timestat_get_user_course_timespent(int $courseid, int $userid): int {
+    global $DB;
+
+    $sql = "SELECT COALESCE(SUM(bt.timespent), 0)
+              FROM {block_timestat} bt
+              JOIN {logstore_standard_log} l ON l.id = bt.log_id
+             WHERE l.courseid = :courseid
+               AND l.userid = :userid";
+
+    $params = [
+            'courseid' => $courseid,
+            'userid' => $userid,
+    ];
+
+    $total = $DB->get_field_sql($sql, $params);
+
+    return (int)($total ?? 0);
+}
+
+/**
  * Function to get the user last log by contextid
  *
  * @param int $contextid

@@ -38,7 +38,7 @@
 {{#shouldseetimer}}
     <div class='timer-container mb-1'>
         <div class='timer-display w-100'>
-            <p class='h3' id='timer'>00:00:00</p>
+            <p class='h3' id='timer' data-initial-seconds='{{initialseconds}}'>{{#str}}loading, block_timestat{{/str}}</p>
             <div class="moreinfo d-none">
                 <div class="info-text">
                     <span class='info-label'>{{#str}}reportedtime, block_timestat{{/str}}: </span>

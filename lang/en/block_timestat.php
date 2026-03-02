@@ -49,6 +49,7 @@ $string['showtimer'] = 'Show timer';
 $string['showtimer_desc'] = 'If enabled, the time counter will be visible to all enrolled users. If disabled, the time counter will be visible only to users with the "block/timestat:viewtimer" capability.';
 $string['reportedtime'] = 'Reported time';
 $string['inactivitytime'] = 'Inactivity time';
+$string['loading'] = 'Loading...';
 $string['timestat:viewreport'] = 'View report';
 $string['timestat:viewtimer'] = 'View timer';
 $string['timestat:addinstance'] = 'Add a new Timestat block';
