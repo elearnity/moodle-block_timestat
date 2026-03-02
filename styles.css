@@ -1,3 +1,38 @@
+/*
+ * Styles for the timestat block.
+ *
+ * @package    block_timestat
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+.timer-container {
+    display: flex;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.timer-display {
+    padding: .5rem;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.timer-display.bg-danger {
+    color: white;
+}
+
+.info-text {
+    font-size: 0.8rem;
+}
+
+.info-label {
+    font-weight: bold;
+}
+
+.info-value {
+    font-weight: normal;
+}
 .timer-container {
     display: flex;
     align-items: center;

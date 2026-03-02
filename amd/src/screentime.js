@@ -1,3 +1,11 @@
+/**
+ * Screen time helper for timestat block.
+ *
+ * @module     block_timestat/screentime
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 class Field {
     constructor(selector) {
         this.selector = selector;
@@ -6,7 +14,9 @@ class Field {
     }
 
     updateMetrics() {
-        if (!this.element) return;
+        if (!this.element) {
+            return;
+        }
         const rect = this.element.getBoundingClientRect();
         this.top = rect.top + window.scrollY;
         this.bottom = rect.bottom + window.scrollY;

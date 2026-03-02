@@ -1,3 +1,11 @@
+/**
+ * Event emitter for timestat block screen time tracking.
+ *
+ * @module     block_timestat/event_emiiter
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 import ScreenTime from 'block_timestat/screentime';
 import ajax from 'core/ajax';
 

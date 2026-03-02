@@ -774,8 +774,9 @@ function block_timestat_build_logs_array($course, $user = 0, $datefrom = 0, $dat
     // Getting all members of a group.
     if ($groupid && !$user) {
         if ($gusers = groups_get_members($groupid)) {
-            $gusers = array_keys($gusers);
-            $joins[] = 'l.userid IN (' . implode(',', $gusers) . ')';
+            list($insql, $inparams) = $DB->get_in_or_equal(array_keys($gusers), SQL_PARAMS_NAMED, 'guser');
+            $joins[] = "l.userid $insql";
+            $params += $inparams;
         } else {
             $joins[] = 'l.userid = 0'; // No users in groups, so we want something that will always be false.
         }
