@@ -19,6 +19,19 @@ To use the block within the *Quiz attempt page*, configure the quiz settings to 
 
 You can access the plugin *settings* from *Site Administration > Plugins > Blocks > Timestat*.
 
+## Public API
+
+Other plugins (e.g. reports) can query dedication time via `\block_timestat\api`.
+Callers must perform their own capability checks.
+
+```php
+use block_timestat\api;
+
+$courseseconds = api::get_course_timespent($courseid, $userid);
+$activityseconds = api::get_activity_timespent($cmid, $userid);
+$contextseconds = api::get_context_timespent($contextid, $userid);
+```
+
 ## More information
 
 The version of the plugin for Moodle 2.9 and earlier was developed by:

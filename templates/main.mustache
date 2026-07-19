@@ -22,35 +22,44 @@
     Variables required for this template:
     * shouldseetimer - Whether the timer should be displayed.
     * shouldseereport - Whether the report button should be displayed.
-    * coursetime - The time the course is set to.
+    * isinactivity - Whether the current page is an activity/resource.
+    * initialseconds - Seconds for the large timer (activity or course).
+    * courseseconds - Total course seconds (shown small on activity pages).
     * courseid - The id of the course.
 
     Example context (json):
     {
         "shouldseetimer": true,
         "shouldseereport": true,
-        "coursetime": "10:15:30",
+        "isinactivity": true,
+        "initialseconds": 624,
+        "courseseconds": 3600,
         "courseid": "1234"
     }
 
 }}
 
 {{#shouldseetimer}}
-    <div class='timer-container mb-1'>
-        <div class='timer-display w-100'>
-            <p class='h3' id='timer' data-initial-seconds='{{initialseconds}}'>{{#str}}loading, block_timestat{{/str}}</p>
+    <div class="timer-container mb-1">
+        <div class="timer-display w-100">
+            {{#isinactivity}}
+                <p class="timer-label text-muted mb-0">{{#str}}activitytime, block_timestat{{/str}}</p>
+            {{/isinactivity}}
+            <p class="h3 mb-0" id="timer" data-initial-seconds="{{initialseconds}}">{{#str}}loading, block_timestat{{/str}}</p>
+            {{#isinactivity}}
+                <p class="timer-coursetotal text-muted mb-0 mt-1" id="coursetimer" data-course-seconds="{{courseseconds}}">
+                    <span class="info-label">{{#str}}totalcoursetime, block_timestat{{/str}}:</span>
+                    <span class="info-value" id="coursetimer-value">{{#str}}loading, block_timestat{{/str}}</span>
+                </p>
+            {{/isinactivity}}
             <div class="moreinfo d-none">
                 <div class="info-text">
-                    <span class='info-label'>{{#str}}reportedtime, block_timestat{{/str}}: </span>
-                    <span class='info-value' id='reportedtime'>00:00:00</span>
+                    <span class="info-label">{{#str}}reportedtime, block_timestat{{/str}}: </span>
+                    <span class="info-value" id="reportedtime">00:00:00</span>
                 </div>
                 <div class="info-text">
-                    <span class='info-label'>{{#str}}inactivitytime, block_timestat{{/str}}: </span>
-                    <span class='info-value' id='inactivitytime'>00:00:00</span>
-                </div>
-                <div class="info-text">
-                    <span class='info-label'>{{#str}}inactivitytime, block_timestat{{/str}}: </span>
-                    <span class='info-value' id='inactivitytime'>{{coursetime}}</span>
+                    <span class="info-label">{{#str}}inactivitytime, block_timestat{{/str}}: </span>
+                    <span class="info-value" id="inactivitytime">00:00:00</span>
                 </div>
             </div>
         </div>

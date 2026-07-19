@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+declare(strict_types=1);
+
 /**
  * Contains the class for the timestat block.
  *
@@ -23,7 +25,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/blocks/timestat/locallib.php');
+use block_timestat\api;
 
 /**
  * Timestat block class.
@@ -55,24 +57,54 @@ class block_timestat extends block_base {
         if ($this->content !== null) {
             return $this->content;
         }
-        $contextid = $this->page->cm ? $this->page->cm->context->id : $this->page->context->id;
-        $context = context_block::instance($this->instance->id);
-        $userisenrolled = is_enrolled($context);
+
+        $modulecontext = $this->get_current_module_context();
+        $contextid = $modulecontext ? $modulecontext->id : $this->page->context->id;
+        $blockcontext = context_block::instance($this->instance->id);
+        $userisenrolled = is_enrolled($blockcontext);
         $config = get_config('block_timestat');
         $this->content = new stdClass();
         $this->content->text = '';
-        $canseetimer = has_capability('block/timestat:viewtimer', $context);
-        $data = new stdClass();
-        $data->courseid = $COURSE->id;
-        $data->shouldseetimer = $userisenrolled && ($canseetimer || ($config->showtimer ?? false));
-        $data->initialseconds = block_timestat_get_user_course_timespent($COURSE->id, $USER->id);
-        $data->shouldseereport = has_capability('block/timestat:viewreport', $context);
+        $canseetimer = has_capability('block/timestat:viewtimer', $blockcontext);
+        $courseseconds = api::get_course_timespent((int) $COURSE->id, (int) $USER->id);
+        $isinactivity = $modulecontext !== null;
+
+        $data = [
+            'courseid' => $COURSE->id,
+            'shouldseetimer' => $userisenrolled && ($canseetimer || ($config->showtimer ?? false)),
+            'isinactivity' => $isinactivity,
+            // On activity pages show activity time large and course total small; otherwise course total large.
+            'initialseconds' => $isinactivity
+                ? api::get_context_timespent($contextid, (int) $USER->id)
+                : $courseseconds,
+            'courseseconds' => $courseseconds,
+            'shouldseereport' => has_capability('block/timestat:viewreport', $blockcontext),
+        ];
         $this->content->text = $OUTPUT->render_from_template('block_timestat/main', $data);
         // If the user is not enrolled in the course, we don't want to count the time.
         if ($userisenrolled) {
             $this->page->requires->js_call_amd('block_timestat/event_emiiter', 'init', [$contextid, $config]);
         }
         return $this->content;
+    }
+
+    /**
+     * Resolve the current activity/resource module context, if any.
+     *
+     * Uses $PAGE->cm when available, otherwise falls back to a module page context.
+     *
+     * @return context_module|null
+     */
+    protected function get_current_module_context(): ?context_module {
+        if (!empty($this->page->cm)) {
+            return context_module::instance($this->page->cm->id);
+        }
+
+        if ($this->page->context instanceof context_module) {
+            return $this->page->context;
+        }
+
+        return null;
     }
 
     /**

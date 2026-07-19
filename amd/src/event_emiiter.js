@@ -13,18 +13,21 @@ export const init = (contextid, config) => {
     const reportInterval = getReportInterval(config);
     const inactiveInterval = getInactiveInterval(config);
 
-    const $timerDisplay = config.showtimer ? document.querySelector('.timer-display') : null;
+    const $timerDisplay = document.querySelector('.timer-display');
     const $timer = document.getElementById('timer');
+    const $coursetimerValue = document.getElementById('coursetimer-value');
+    const $coursetimer = document.getElementById('coursetimer');
     const $reportedtime = document.getElementById('reportedtime');
     const $inactivitytime = document.getElementById('inactivitytime');
     const initialSeconds = $timer ? parseInt($timer.dataset.initialSeconds || '0', 10) : 0;
+    const courseSeconds = $coursetimer ? parseInt($coursetimer.dataset.courseSeconds || '0', 10) : 0;
 
     const inactiveClass = 'text-black-50';
     const screentime = new ScreenTime({
         field: {name: 'content', selector: 'body'},
         reportInterval: reportInterval,
         inactiveInterval: inactiveInterval,
-        onReport: async (log) => {
+        onReport: async(log) => {
             if (!log.body) {
                 return;
             }
@@ -48,13 +51,16 @@ export const init = (contextid, config) => {
             $reportedtime.textContent = formatTime(totalSeconds);
         },
         everySecondCallback: (log) => {
-            const sessionSeconds = log['body'] || 0;
+            const sessionSeconds = log.body || 0;
             const seconds = initialSeconds + sessionSeconds;
             if ($timer) {
                 $timer.textContent = formatTime(seconds);
-                if ($inactivitytime) {
-                    $inactivitytime.textContent = formatTime(screentime.inactivityTimer);
-                }
+            }
+            if ($coursetimerValue) {
+                $coursetimerValue.textContent = formatTime(courseSeconds + sessionSeconds);
+            }
+            if ($inactivitytime) {
+                $inactivitytime.textContent = formatTime(screentime.inactivityTimer);
             }
         },
         onInactivity: () => {

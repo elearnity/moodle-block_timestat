@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+declare(strict_types=1);
+
 /**
- *
  * Lang strings for the timestat block.
  *
  * @package    block_timestat
@@ -23,17 +24,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityname'] = 'Aktywność / zasób';
+$string['activitytime'] = 'Czas aktywności';
 $string['blockname'] = 'Timestat';
-$string['pluginname'] = 'Timestat';
 $string['blocktitle'] = 'Timestat';
-$string['nologs'] = 'Nie znaleziono żadnych logów!';
-$string['calculate'] = 'Oblicz czas';
-$string['link'] = 'Oblicz czas';
-$string['summary'] = 'Czas całkowity';
-$string['start'] = 'Od:';
-$string['end'] = 'Do:';
-$string['days'] = ' dni ';
-$string['hours'] = ' godzin ';
-$string['minuts'] = ' minut ';
-$string['seconds'] = ' sekund ';
-$string['choosetimeperiod'] = 'Wskaż przedział czasu';
+$string['cmid'] = 'ID modułu kursu';
+$string['coursededication'] = 'Czas poświęcony na kurs';
+$string['entitytimestat'] = 'Czas poświęcony';
+$string['nologreader'] = 'Brak dostępnego magazynu logów SQL. Włącz magazyn logów obsługujący odczyt SQL.';
+$string['nologs'] = 'Nie znaleziono żadnych rekordów czasu poświęconego.';
+$string['pluginname'] = 'Timestat';
+$string['timespent'] = 'Czas spędzony';
+$string['totalcoursetime'] = 'Razem w kursie';
+$string['unknownactivity'] = 'Nieznana aktywność';
+$string['viewreport'] = 'Zobacz raport';

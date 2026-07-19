@@ -33,30 +33,13 @@
 .info-value {
     font-weight: normal;
 }
-.timer-container {
-    display: flex;
-    align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+.timer-label {
+    font-size: 0.75rem;
+    line-height: 1.2;
 }
 
-.timer-display {
-    padding: .5rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-}
-
-.timer-display.bg-danger {
-    color: white;
-}
-
-.info-text {
-    font-size: 0.8rem;
-}
-
-.info-label {
-    font-weight: bold;
-}
-
-.info-value {
-    font-weight: normal;
+.timer-coursetotal {
+    font-size: 0.85rem;
+    line-height: 1.3;
 }
