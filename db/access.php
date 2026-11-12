@@ -39,15 +39,16 @@ $capabilities = [
         ],
     ],
     'block/timestat:viewreport' => [
+        'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
-        'contextlevel' => CONTEXT_BLOCK,
+        // Checked at course context in index.php and the block content.
+        'contextlevel' => CONTEXT_COURSE,
         'archetypes' => [
             'guest' => CAP_PREVENT,
             'user' => CAP_PREVENT,
             'student' => CAP_PREVENT,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
     ],

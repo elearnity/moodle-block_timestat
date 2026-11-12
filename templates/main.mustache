@@ -22,14 +22,14 @@
     Variables required for this template:
     * shouldseetimer - Whether the timer should be displayed.
     * shouldseereport - Whether the report button should be displayed.
-    * coursetime - The time the course is set to.
+    * initialseconds - Accumulated course time in seconds.
     * courseid - The id of the course.
 
     Example context (json):
     {
         "shouldseetimer": true,
         "shouldseereport": true,
-        "coursetime": "10:15:30",
+        "initialseconds": 36930,
         "courseid": "1234"
     }
 
@@ -45,12 +45,8 @@
                     <span class='info-value' id='reportedtime'>00:00:00</span>
                 </div>
                 <div class="info-text">
-                    <span class='info-label'>{{#str}}inactivitytime, block_timestat{{/str}}: </span>
+                    <span class='info-label'>{{#str}}inactivitytimelabel, block_timestat{{/str}}: </span>
                     <span class='info-value' id='inactivitytime'>00:00:00</span>
-                </div>
-                <div class="info-text">
-                    <span class='info-label'>{{#str}}inactivitytime, block_timestat{{/str}}: </span>
-                    <span class='info-value' id='inactivitytime'>{{coursetime}}</span>
                 </div>
             </div>
         </div>
@@ -60,7 +56,7 @@
 {{#shouldseereport}}
     <div class="d-flex justify-content-center">
         <a href="{{config.wwwroot}}/blocks/timestat/index.php?id={{courseid}}" class="btn btn-primary">
-        <i class="icon fa fa-bar-chart"></i> {{#str}}viewreport, block_timestat{{/str}}
+            <i class="icon fa fa-bar-chart"></i> {{#str}}viewreport, block_timestat{{/str}}
         </a>
     </div>
 {{/shouldseereport}}

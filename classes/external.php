@@ -32,10 +32,10 @@ require_once($CFG->dirroot . '/blocks/timestat/locallib.php');
 use context;
 use core_course\external\course_summary_exporter;
 use dml_exception;
-use external_api;
-use external_function_parameters;
-use external_value;
-use external_single_structure;
+use core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_value;
+use core_external\external_single_structure;
 use invalid_parameter_exception;
 use moodle_exception;
 
@@ -46,7 +46,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class external extends external_api {
-
     /**
      * update_register_parameters
      *
@@ -54,7 +53,7 @@ class external extends external_api {
      */
     public static function update_register_parameters(): external_function_parameters {
         return new external_function_parameters(
-                [
+            [
                         'timespent' => new external_value(PARAM_INT),
                         'contextid' => new external_value(PARAM_INT),
                 ]
@@ -75,26 +74,43 @@ class external extends external_api {
     public static function update_register(int $timespent, int $contextid): array {
         global $DB, $USER;
 
-        $context = context::instance_by_id($contextid);
-        self::validate_context($context);
         $params = self::validate_parameters(
-                self::update_register_parameters(),
-                ['timespent' => $timespent, 'contextid' => $contextid]
+            self::update_register_parameters(),
+            ['timespent' => $timespent, 'contextid' => $contextid]
         );
-        $log = block_timestat_get_user_last_log_by_contextid($contextid);
-        if ($log->userid !== $USER->id) {
-            throw new moodle_exception('You are not allowed to update this log');
+        $context = context::instance_by_id($params['contextid']);
+        self::validate_context($context);
+
+        $log = block_timestat_get_user_last_log_by_contextid($params['contextid']);
+        if ($log === null) {
+            return [];
         }
+        if ((int)$log->userid !== (int)$USER->id) {
+            throw new moodle_exception('nopermissions', 'error', '', 'update timestat');
+        }
+
+        $maximum = max(0, time() - (int)$log->timecreated);
+        $validatedtimespent = min(max(0, $params['timespent']), $maximum);
         $recordtimestat = $DB->get_record('block_timestat', ['log_id' => $log->id]);
 
         if (!$recordtimestat) {
             $recordbt = new \stdClass();
             $recordbt->log_id = $log->id;
-            $recordbt->timespent = $params['timespent'];
-            $DB->insert_record('block_timestat', $recordbt);
+            $recordbt->timespent = $validatedtimespent;
+            try {
+                $DB->insert_record('block_timestat', $recordbt);
+            } catch (\dml_write_exception $exception) {
+                // A concurrent heartbeat may have inserted the unique log row first.
+                $recordtimestat = $DB->get_record('block_timestat', ['log_id' => $log->id]);
+                if (!$recordtimestat) {
+                    throw $exception;
+                }
+                $recordtimestat->timespent = max((int)$recordtimestat->timespent, $validatedtimespent);
+                $DB->update_record('block_timestat', $recordtimestat);
+            }
             return [];
         }
-        $recordtimestat->timespent = $params['timespent'];
+        $recordtimestat->timespent = max((int)$recordtimestat->timespent, $validatedtimespent);
         $DB->update_record('block_timestat', $recordtimestat);
         return [];
     }

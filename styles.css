@@ -33,30 +33,19 @@
 .info-value {
     font-weight: normal;
 }
-.timer-container {
+
+/* Keep course/user/activity/format filters on one row. */
+.logselectform .logselectform-filters {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
-.timer-display {
-    padding: .5rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-}
-
-.timer-display.bg-danger {
-    color: white;
-}
-
-.info-text {
-    font-size: 0.8rem;
-}
-
-.info-label {
-    font-weight: bold;
-}
-
-.info-value {
-    font-weight: normal;
+.logselectform .logselectform-filters .form-select {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    vertical-align: middle;
 }

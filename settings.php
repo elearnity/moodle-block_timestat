@@ -25,20 +25,34 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
-    $settings->add(new admin_setting_configcheckbox('block_timestat/showtimer',
+    $settings->add(new admin_setting_configcheckbox(
+        'block_timestat/showtimer',
         get_string('showtimer', 'block_timestat'),
-        get_string('showtimer_desc', 'block_timestat'), 0));
+        get_string('showtimer_desc', 'block_timestat'),
+        0
+    ));
 
-    $settings->add(new admin_setting_configtext('block_timestat/loginterval',
+    $settings->add(new admin_setting_configtext(
+        'block_timestat/loginterval',
         get_string('loginterval', 'block_timestat'),
-        get_string('loginterval_desc', 'block_timestat'), 15, PARAM_INT));
+        get_string('loginterval_desc', 'block_timestat'),
+        15,
+        PARAM_INT
+    ));
 
-    $settings->add(new admin_setting_configtext('block_timestat/inactivitytime',
+    $settings->add(new admin_setting_configtext(
+        'block_timestat/inactivitytime',
         get_string('inactivitytime', 'block_timestat'),
-        get_string('inactivitytime_desc', 'block_timestat'), 30, PARAM_INT));
+        get_string('inactivitytime_desc', 'block_timestat'),
+        30,
+        PARAM_INT
+    ));
 
-    $settings->add(new admin_setting_configtext('block_timestat/inactivitytime_small',
+    $settings->add(new admin_setting_configtext(
+        'block_timestat/inactivitytime_small',
         get_string('inactivitytime_small', 'block_timestat'),
-        get_string('inactivitytime_small_desc', 'block_timestat'), 30, PARAM_INT));
+        get_string('inactivitytime_small_desc', 'block_timestat'),
+        30,
+        PARAM_INT
+    ));
 }
-

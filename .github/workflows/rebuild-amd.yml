@@ -1,0 +1,49 @@
+name: Rebuild AMD
+
+# Produce amd/build with the same Moodle 5.3 Node/grunt toolchain as CI.
+# Download the artifact and commit it so `moodle-plugin-ci grunt` freshness checks pass.
+# See: https://github.com/moodlehq/moodle-plugin-ci/issues/319
+on:
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@v6
+        with:
+          path: plugin
+
+      - name: Check out Moodle MOODLE_503_STABLE
+        uses: actions/checkout@v6
+        with:
+          repository: moodle/moodle
+          ref: MOODLE_503_STABLE
+          path: moodle
+
+      - name: Install plugin into Moodle tree
+        run: |
+          rm -rf moodle/public/blocks/timestat
+          mkdir -p moodle/public/blocks
+          cp -a plugin/. moodle/public/blocks/timestat/
+
+      - name: Setup Node from Moodle .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: moodle/.nvmrc
+
+      - name: Install Moodle npm dependencies
+        working-directory: moodle
+        run: npm install
+
+      - name: Build plugin AMD
+        working-directory: moodle/public/blocks/timestat/amd
+        run: npx grunt amd --max-lint-warnings=0
+
+      - name: Upload AMD builds
+        uses: actions/upload-artifact@v7
+        with:
+          name: amd-build
+          path: moodle/public/blocks/timestat/amd/build/
+          retention-days: 3

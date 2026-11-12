@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/timestat/db" VERSION="20140901" COMMENT="XMLDB file for Moodle blocks/timestat"
+<XMLDB PATH="blocks/timestat/db" VERSION="20261112" COMMENT="XMLDB file for Moodle blocks/timestat"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -13,6 +13,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="logid" UNIQUE="true" FIELDS="log_id"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

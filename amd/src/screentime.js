@@ -58,6 +58,7 @@ export default class ScreenTime {
         document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
         window.addEventListener('scroll', this.updateViewport.bind(this));
         window.addEventListener('resize', this.updateViewport.bind(this));
+        this.addActivityListeners();
         this.start();
     }
 
@@ -72,13 +73,17 @@ export default class ScreenTime {
             percentOnScreen: 50,
             reportInterval: 10,
             googleAnalytics: false,
-            everySecondCallback: function () {
+            everySecondCallback: function() {
+                // No-op default callback.
             },
-            onInactivity: function () {
+            onInactivity: function() {
+                // No-op default callback.
             },
-            onStart: function () {
+            onStart: function() {
+                // No-op default callback.
             },
-            onReport: function () {
+            onReport: function() {
+                // No-op default callback.
             }
         };
     }
@@ -100,7 +105,6 @@ export default class ScreenTime {
                 this.report();
             }
         }, 1000);
-        this.addActivityListeners();
     }
 
     addActivityListeners() {
@@ -123,6 +127,9 @@ export default class ScreenTime {
     }
 
     handleInactivity() {
+        if (!this.isActive) {
+            return;
+        }
         if (this.options.onInactivity) {
             this.options.onInactivity();
         }

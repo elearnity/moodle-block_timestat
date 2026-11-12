@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/blocks/timestat/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_timestat extends block_base {
-
     /**
      * Initialises the block.
      *
@@ -56,20 +55,22 @@ class block_timestat extends block_base {
             return $this->content;
         }
         $contextid = $this->page->cm ? $this->page->cm->context->id : $this->page->context->id;
-        $context = context_block::instance($this->instance->id);
-        $userisenrolled = is_enrolled($context);
+        $blockcontext = context_block::instance($this->instance->id);
+        $coursecontext = context_course::instance($COURSE->id);
+        $userisenrolled = is_enrolled($coursecontext);
+        $canview = has_capability('block/timestat:view', $blockcontext);
         $config = get_config('block_timestat');
         $this->content = new stdClass();
         $this->content->text = '';
-        $canseetimer = has_capability('block/timestat:viewtimer', $context);
+        $canseetimer = has_capability('block/timestat:viewtimer', $blockcontext);
         $data = new stdClass();
         $data->courseid = $COURSE->id;
-        $data->shouldseetimer = $userisenrolled && ($canseetimer || ($config->showtimer ?? false));
+        $data->shouldseetimer = $userisenrolled && $canview && ($canseetimer || ($config->showtimer ?? false));
         $data->initialseconds = block_timestat_get_user_course_timespent($COURSE->id, $USER->id);
-        $data->shouldseereport = has_capability('block/timestat:viewreport', $context);
+        $data->shouldseereport = has_capability('block/timestat:viewreport', $coursecontext);
         $this->content->text = $OUTPUT->render_from_template('block_timestat/main', $data);
         // If the user is not enrolled in the course, we don't want to count the time.
-        if ($userisenrolled) {
+        if ($userisenrolled && $canview) {
             $this->page->requires->js_call_amd('block_timestat/event_emiiter', 'init', [$contextid, $config]);
         }
         return $this->content;
@@ -91,14 +92,29 @@ class block_timestat extends block_base {
         ];
     }
 
+    /**
+     * Does this block have global config?
+     *
+     * @return bool
+     */
     public function has_config() {
         return true;
     }
 
+    /**
+     * Allow multiple instances in the same page?
+     *
+     * @return bool
+     */
     public function instance_allow_multiple() {
         return false;
     }
 
+    /**
+     * Return the configuration for the external API.
+     *
+     * @return \stdClass
+     */
     public function get_config_for_external() {
         $configs = get_config('block_timestat');
         return (object)[

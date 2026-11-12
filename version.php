@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  *
  * Version details for the timestat block.
@@ -24,8 +25,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2024101400;
+$plugin->version = 2026111201;
 $plugin->component = 'block_timestat';
 $plugin->maturity   = MATURITY_STABLE;
 $plugin->requires = 2021051700;
-$plugin->release = '2.0.1';
+$plugin->release = '2.1.1';
+$plugin->dependencies = [
+    'logstore_standard' => ANY_VERSION,
+];

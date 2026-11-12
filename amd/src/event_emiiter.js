@@ -24,7 +24,7 @@ export const init = (contextid, config) => {
         field: {name: 'content', selector: 'body'},
         reportInterval: reportInterval,
         inactiveInterval: inactiveInterval,
-        onReport: async (log) => {
+        onReport: async(log) => {
             if (!log.body) {
                 return;
             }
@@ -48,7 +48,7 @@ export const init = (contextid, config) => {
             $reportedtime.textContent = formatTime(totalSeconds);
         },
         everySecondCallback: (log) => {
-            const sessionSeconds = log['body'] || 0;
+            const sessionSeconds = log.body || 0;
             const seconds = initialSeconds + sessionSeconds;
             if ($timer) {
                 $timer.textContent = formatTime(seconds);
@@ -78,8 +78,10 @@ const formatTime = (seconds) => {
 
 const getInactiveInterval = (config) => {
     const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
-    let {inactivitytime, inactivitytime_small} = config;
-    inactivitytime = isMobile ? inactivitytime_small : inactivitytime;
+    // PHP config keys use underscores.
+    let inactivitytime = config.inactivitytime;
+    const inactivitytimesmall = config.inactivitytime_small;
+    inactivitytime = isMobile ? inactivitytimesmall : inactivitytime;
     inactivitytime = inactivitytime && inactivitytime >= 10 ? inactivitytime : 10;
     return inactivitytime;
 };

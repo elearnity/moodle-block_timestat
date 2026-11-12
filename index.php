@@ -23,25 +23,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core\session\manager;
-
 require('../../config.php');
 global $CFG;
 require_once($CFG->dirroot . '/blocks/timestat/locallib.php');
 require_once($CFG->libdir . '/adminlib.php');
 
 $id = optional_param('id', 0, PARAM_INT);
-$hostcourse = optional_param('host_course', '', PARAM_PATH);
-
-if (empty($hostcourse)) {
-    $hostid = $CFG->mnet_localhost_id;
-    if (empty($id)) {
-        $site = get_site();
-        $id = $site->id;
-    }
-} else {
-    list($hostid, $id) = explode('/', $hostcourse);
+if (empty($id)) {
+    $site = get_site();
+    $id = $site->id;
 }
+$hostid = $CFG->mnet_localhost_id;
 
 $group = optional_param('group', 0, PARAM_INT);
 $user = optional_param('user', 0, PARAM_INT);
@@ -85,9 +77,6 @@ $params = [];
 if ($id !== 0) {
     $params['id'] = $id;
 }
-if ($hostcourse !== '') {
-    $params['host_course'] = $hostcourse;
-}
 if ($group !== 0) {
     $params['group'] = $group;
 }
@@ -129,24 +118,21 @@ if ($chooselog !== 0) {
 if ($logformat !== 'showashtml') {
     $params['logformat'] = $logformat;
 }
-$PAGE->set_url('/block/timestat/index.php', $params);
+$PAGE->set_url('/blocks/timestat/index.php', $params);
 $PAGE->set_pagelayout('report');
 
-if ($hostid == $CFG->mnet_localhost_id) {
-    $course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
-
-} else {
-    $coursestub = $DB->get_record('mnet_log', ['hostid' => $hostid, 'course' => $id], '*', true);
-    $course->id = $id;
-    $course->shortname = $coursestub->coursename;
-    $course->fullname = $coursestub->coursename;
-}
+$course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
 require_login($course);
 
 $context = context_course::instance($course->id);
 
 require_capability('block/timestat:viewreport', $context);
+// Site-wide report (HTML and Excel) exposes every tracked user; require the same
+// system capability that admin_externalpage_setup('reportlog') enforces for HTML.
+if ($course->id == SITEID) {
+    require_capability('report/log:view', context_system::instance());
+}
 
 if (!empty($page)) {
     $strlogs = get_string('logs') . ": " . get_string('page', 'report_log', $page + 1);
@@ -156,20 +142,14 @@ if (!empty($page)) {
 $stradministration = get_string('administration');
 $strreports = get_string('reports');
 
-// Before we close session, make sure we have editing information in session.
-$adminediting = optional_param('adminedit', -1, PARAM_BOOL);
-if ($PAGE->user_allowed_editing() && $adminediting != -1) {
-    $USER->editing = $adminediting;
-}
-manager::write_close();
-
 if (!empty($chooselog)) {
     $userinfo = get_string('allparticipants');
-    $dateinfo = get_string('alldays');
+    $datefrominfo = get_string('alldays');
+    $datetoinfo = get_string('alldays');
 
     if ($user) {
         $u = $DB->get_record('user', ['id' => $user, 'deleted' => 0], '*', MUST_EXIST);
-        $userinfo = fullname($u, has_capability('moodle/site:viewfullnames', $context));
+        $userinfo = s(fullname($u, has_capability('moodle/site:viewfullnames', $context)));
     }
     if ($datefrom) {
         $datefrominfo = userdate($datefrom, get_string('strftimedaydate'));
@@ -180,47 +160,79 @@ if (!empty($chooselog)) {
 
     switch ($logformat) {
         case 'downloadasexcel':
-            if (!block_timestat_print_log_xls($course, $user, $datefrom, $dateto, $modname, $modid,
-                    $modaction, $group, 'l.time DESC')) {
+            if (
+                !block_timestat_print_log_xls(
+                    $course,
+                    $user,
+                    $datefrom,
+                    $dateto,
+                    $modname,
+                    $modid,
+                    $modaction,
+                    $group,
+                    'l.time DESC'
+                )
+            ) {
                 echo $OUTPUT->notification(get_string('nologs', 'block_timestat'));
                 echo $OUTPUT->footer();
             }
             exit;
         default:
-            if ($hostid != $CFG->mnet_localhost_id || $course->id == SITEID) {
+            if ($course->id == SITEID) {
                 admin_externalpage_setup('reportlog');
                 $PAGE->set_title($course->shortname . ': ' . $strlogs);
                 $PAGE->set_heading($course->fullname);
-                $PAGE->navbar->add("Timestat");
+                $PAGE->navbar->add(get_string('pluginname', 'block_timestat'));
                 echo $OUTPUT->header();
-
             } else {
                 $PAGE->set_title($course->shortname . ': ' . $strlogs);
                 $PAGE->set_heading($course->fullname);
-                $PAGE->navbar->add("Timestat");
+                $PAGE->navbar->add(get_string('pluginname', 'block_timestat'));
                 echo $OUTPUT->header();
             }
 
-            echo $OUTPUT->heading(format_string($course->fullname) . ": $userinfo, $datefrominfo (" . usertimezone() . ")");
-            block_timestat_report_log_print_mnet_selector_form($hostid, $course, $user, $datefrom, $dateto, $modid, $group,
-                    $showcourses, $showusers, $logformat);
+            echo $OUTPUT->heading(format_string($course->fullname) . ": $userinfo, $datefrominfo - $datetoinfo (" .
+                    usertimezone() . ")");
+            block_timestat_report_log_print_mnet_selector_form(
+                $hostid,
+                $course,
+                $user,
+                $datefrom,
+                $dateto,
+                $modid,
+                $group,
+                $showcourses,
+                $showusers,
+                $logformat
+            );
 
-            if ($hostid == $CFG->mnet_localhost_id) {
-                block_timestat_print_log($course, $user, $datefrom, $dateto, 'l.timecreated DESC', $page, $perpage,
-                        "index.php?id=$course->id&amp;chooselog=1&amp;user=$user&amp;datefrom=$datefrom&amp;dateto=$dateto&amp;
-                        modid=$modid&amp;modaction=$modaction&amp;group=$group",
-                        $modname, $modid, $modaction, $group);
-            } else {
-                block_timestat_print_mnet_log(
-                        $hostid, $id, $user, $datefrom, $dateto, 'l.timecreated DESC',
-                        $page, $perpage, "", $modname, $modid, $modaction, $group
-                );
-            }
+            block_timestat_print_log(
+                $course,
+                $user,
+                $datefrom,
+                $dateto,
+                'l.timecreated DESC',
+                $page,
+                $perpage,
+                new moodle_url('/blocks/timestat/index.php', [
+                    'id' => $course->id,
+                    'chooselog' => 1,
+                    'user' => $user,
+                    'datefrom' => $datefrom,
+                    'dateto' => $dateto,
+                    'modid' => $modid,
+                    'modaction' => $modaction,
+                    'group' => $group,
+                ]),
+                $modname,
+                $modid,
+                $modaction,
+                $group
+            );
             break;
     }
-
 } else {
-    if ($hostid != $CFG->mnet_localhost_id || $course->id == SITEID) {
+    if ($course->id == SITEID) {
         admin_externalpage_setup('reportlog', '', null, '', ['pagelayout' => 'report']);
         echo $OUTPUT->header();
     } else {
@@ -231,8 +243,16 @@ if (!empty($chooselog)) {
 
     echo $OUTPUT->heading(get_string('chooselogs') . ':');
 
-    block_timestat_report_log_print_selector_form($course, $user, $datefrom, $modname, $modaction,
-            $group, $showcourses, $showusers);
+    block_timestat_report_log_print_selector_form(
+        $course,
+        $user,
+        $datefrom,
+        $modname,
+        $modaction,
+        $group,
+        $showcourses,
+        $showusers
+    );
 }
 
 echo $OUTPUT->footer();

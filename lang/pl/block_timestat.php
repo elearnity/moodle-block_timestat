@@ -24,16 +24,18 @@
  */
 
 $string['blockname'] = 'Timestat';
-$string['pluginname'] = 'Timestat';
 $string['blocktitle'] = 'Timestat';
-$string['nologs'] = 'Nie znaleziono żadnych logów!';
 $string['calculate'] = 'Oblicz czas';
-$string['link'] = 'Oblicz czas';
-$string['summary'] = 'Czas całkowity';
-$string['start'] = 'Od:';
-$string['end'] = 'Do:';
-$string['days'] = ' dni ';
-$string['hours'] = ' godzin ';
-$string['minuts'] = ' minut ';
-$string['seconds'] = ' sekund ';
 $string['choosetimeperiod'] = 'Wskaż przedział czasu';
+$string['cleanuporphanedtask'] = 'Usuń osierocone rekordy Timestat';
+$string['days'] = ' dni ';
+$string['end'] = 'Do:';
+$string['hours'] = ' godzin ';
+$string['inactivitytimelabel'] = 'Czas bezczynności';
+$string['link'] = 'Oblicz czas';
+$string['minuts'] = ' minut ';
+$string['nologs'] = 'Nie znaleziono żadnych logów!';
+$string['pluginname'] = 'Timestat';
+$string['seconds'] = ' sekund ';
+$string['start'] = 'Od:';
+$string['summary'] = 'Czas całkowity';
